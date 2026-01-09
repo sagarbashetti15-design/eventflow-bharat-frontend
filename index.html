@@ -3,154 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EventFlow Bharat | Premium Event Management</title>
 
-<!-- Favicon (SVG) -->
-<link rel="icon" type="image/svg+xml"
-href="data:image/svg+xml,
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-<rect width='100' height='100' rx='20' fill='%236C63FF'/>
-<text x='50' y='65' font-size='60' text-anchor='middle' fill='white'>E</text>
-</svg>">
+<title>EventFlow Bharat | Discover & Book Events</title>
+<meta name="description" content="Discover, book and manage events across India. Weddings, concerts, corporate events & more.">
 
-<!-- Razorpay -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <style>
-/* ---------------- RESET ---------------- */
+/* ===== BASE ===== */
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Inter,system-ui,Arial;
-  background:#F7F9FC;
-  color:#1F2937;
-  line-height:1.6;
-}
-a{text-decoration:none;color:inherit}
+body{margin:0;font-family:Inter,Arial;background:#f7f9fc;color:#1f2937}
+.container{max-width:1200px;margin:auto;padding:20px}
+h1,h2,h3{margin:0}
 
-/* ---------------- BRAND ---------------- */
-:root{
-  --brand:#6C63FF;
-  --brand-dark:#5148d6;
-  --soft:#EEF0FF;
-  --card:#FFFFFF;
-}
-
-/* ---------------- LAYOUT ---------------- */
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:24px;
-}
-.section{margin:80px 0}
-
-/* ---------------- ANIMATIONS ---------------- */
-.fade-up{
-  opacity:0;
-  transform:translateY(30px);
-  animation:fadeUp .8s ease forwards;
-}
-.delay-1{animation-delay:.2s}
-.delay-2{animation-delay:.4s}
-@keyframes fadeUp{
-  to{opacity:1;transform:none}
-}
-
-/* ---------------- HERO ---------------- */
+/* ===== HERO ===== */
 .hero{
-  background:linear-gradient(135deg,var(--brand),var(--brand-dark));
-  color:#fff;
-  border-radius:28px;
-  padding:64px 32px;
+  background:linear-gradient(135deg,#6c63ff,#4b47c6);
+  color:#fff;padding:60px 20px;border-radius:0 0 32px 32px
 }
-.hero-grid{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:32px;
+.hero h1{font-size:40px}
+.hero p{opacity:.9;margin:10px 0 20px}
+.searchbar{display:flex;gap:10px;flex-wrap:wrap}
+.searchbar input,select{
+  padding:14px;border-radius:12px;border:none;flex:1
 }
-.hero h1{font-size:44px;margin:0}
-.hero p{font-size:18px;opacity:.95}
-.cta{
-  display:inline-block;
-  background:#fff;
-  color:var(--brand);
-  padding:16px 28px;
-  border-radius:14px;
-  font-weight:600;
+.searchbar button{
+  padding:14px 20px;border-radius:12px;border:none;
+  background:#fff;color:#6c63ff;font-weight:600
 }
 
-/* ---------------- CARDS ---------------- */
-.card{
-  background:var(--card);
-  border-radius:22px;
-  padding:32px;
-  box-shadow:0 14px 40px rgba(0,0,0,.08);
+/* ===== CATEGORIES ===== */
+.categories{display:flex;gap:12px;overflow-x:auto;padding:20px 0}
+.cat{
+  background:#fff;padding:10px 18px;border-radius:999px;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  cursor:pointer;white-space:nowrap
 }
+.cat.active{background:#6c63ff;color:#fff}
 
-/* ---------------- AI ---------------- */
-.ai{
-  background:var(--soft);
-  border-left:6px solid var(--brand);
-}
-
-/* ---------------- PACKAGES ---------------- */
+/* ===== EVENTS ===== */
 .grid{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:24px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px
 }
-.package{
-  border:2px solid #E5E7EB;
-  border-radius:22px;
-  padding:28px;
-  text-align:center;
-  transition:.3s;
+.card{
+  background:#fff;border-radius:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  overflow:hidden;transition:.3s
 }
-.package:hover{
-  transform:translateY(-6px);
-  border-color:var(--brand);
-}
-.price{font-size:32px;font-weight:700}
+.card:hover{transform:translateY(-6px)}
+.card img{width:100%;height:160px;object-fit:cover}
+.card-body{padding:18px}
+.price{font-weight:700;color:#6c63ff}
 
-/* ---------------- FORMS ---------------- */
-input{
-  width:100%;
-  padding:16px;
-  border-radius:14px;
-  border:1px solid #D1D5DB;
-  margin:10px 0;
-}
+/* ===== BUTTON ===== */
 button{
-  width:100%;
-  padding:16px;
-  border-radius:14px;
-  border:none;
-  background:var(--brand);
-  color:#fff;
-  font-size:16px;
-  font-weight:600;
+  width:100%;padding:14px;border-radius:12px;
+  border:none;background:#6c63ff;color:#fff;font-weight:600;
+  cursor:pointer
 }
 
-/* ---------------- MOBILE CTA ---------------- */
+/* ===== MODAL ===== */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);
+  display:none;align-items:center;justify-content:center;z-index:1000
+}
+.modal-box{
+  background:#fff;padding:24px;border-radius:18px;
+  width:90%;max-width:420px
+}
+input{
+  width:100%;padding:14px;border-radius:12px;
+  border:1px solid #ccc;margin:8px 0
+}
+
+/* ===== AI ===== */
+.ai{
+  background:#eef0ff;border-left:5px solid #6c63ff;
+  border-radius:18px;padding:20px;margin:40px 0
+}
+
+/* ===== FOOTER ===== */
+footer{
+  background:#fff;padding:40px;text-align:center;margin-top:60px
+}
+
+/* ===== MOBILE CTA ===== */
 .mobile-cta{
-  position:fixed;
-  bottom:16px;
-  left:16px;
-  right:16px;
-  display:none;
+  position:fixed;bottom:16px;left:16px;right:16px;
+  display:none
 }
-
-/* ---------------- ADMIN ---------------- */
-#admin{white-space:pre-wrap;font-size:14px}
-
-/* ---------------- RESPONSIVE ---------------- */
-@media(min-width:768px){
-  .hero-grid{grid-template-columns:1.2fr .8fr}
-  .grid{grid-template-columns:repeat(3,1fr)}
-  .mobile-cta{display:none}
-}
-@media(max-width:767px){
-  .hero h1{font-size:34px}
+@media(max-width:768px){
   .mobile-cta{display:block}
 }
 </style>
@@ -159,137 +102,166 @@ button{
 <body>
 
 <!-- HERO -->
-<div class="container">
-  <div class="hero fade-up">
-    <div class="hero-grid">
-      <div>
-        <!-- LOGO -->
-        <svg width="60" height="60" viewBox="0 0 100 100">
-          <rect width="100" height="100" rx="20" fill="#fff"/>
-          <text x="50" y="65" font-size="60" text-anchor="middle" fill="#6C63FF">E</text>
-        </svg>
-
-        <h1>EventFlow Bharat</h1>
-        <p>Premium event planning with seamless booking, payments & AI assistance.</p>
-        <a class="cta" href="#packages">Plan Your Event</a>
-      </div>
-      <div>
-        <p>✔ Trusted by families & corporates</p>
-        <p>✔ Transparent pricing</p>
-        <p>✔ Stress-free execution</p>
-      </div>
+<div class="hero">
+  <div class="container">
+    <h1>Discover Events Near You</h1>
+    <p>Weddings • Music • Corporate • Tech • Food</p>
+    <div class="searchbar">
+      <input id="search" placeholder="Search events">
+      <select id="city">
+        <option value="">All Cities</option>
+        <option>Bangalore</option>
+        <option>Mumbai</option>
+        <option>Delhi</option>
+        <option>Hyderabad</option>
+      </select>
+      <button onclick="filter()">Search</button>
     </div>
   </div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="container">
+  <div class="categories">
+    <div class="cat active" onclick="setCat('all')">All</div>
+    <div class="cat" onclick="setCat('music')">Music</div>
+    <div class="cat" onclick="setCat('tech')">Tech</div>
+    <div class="cat" onclick="setCat('wedding')">Wedding</div>
+    <div class="cat" onclick="setCat('corporate')">Corporate</div>
+  </div>
+</div>
+
+<!-- EVENTS -->
+<div class="container">
+  <div class="grid" id="events"></div>
 </div>
 
 <!-- AI -->
-<div class="container section">
-  <div class="card ai fade-up delay-1">
-    <h3>🤖 AI Event Assistant</h3>
-    <p id="aiText">Tell me what you’re planning.</p>
-    <button onclick="askAI('wedding')">Wedding</button>
-    <button onclick="askAI('birthday')">Birthday</button>
-    <button onclick="askAI('corporate')">Corporate</button>
+<div class="container">
+  <div class="ai">
+    <h3>🤖 AI Event Helper</h3>
+    <p id="aiText">What are you planning?</p>
+    <button onclick="ai('wedding')">Wedding</button>
+    <button onclick="ai('birthday')">Birthday</button>
+    <button onclick="ai('corporate')">Corporate</button>
   </div>
 </div>
 
-<!-- PACKAGES -->
-<div class="container section" id="packages">
-  <div class="fade-up delay-2">
-    <h2>Select Your Package</h2>
-    <div class="grid">
-      <div class="package">
-        <h3>Basic</h3>
-        <div class="price">₹9,999</div>
-        <p>Photography + Decoration</p>
-        <button onclick="selectPkg('Basic',9999)">Choose</button>
-      </div>
-      <div class="package">
-        <h3>Premium</h3>
-        <div class="price">₹24,999</div>
-        <p>DJ + Decor + Photography</p>
-        <button onclick="selectPkg('Premium',24999)">Choose</button>
-      </div>
-      <div class="package">
-        <h3>Luxury</h3>
-        <div class="price">₹49,999</div>
-        <p>End-to-end management</p>
-        <button onclick="selectPkg('Luxury',49999)">Choose</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- BOOKING -->
-<div class="container section">
-  <div class="card" id="booking" style="display:none">
-    <h2>Book Your Event</h2>
-    <input id="name" placeholder="Event Name">
-    <input id="date" type="date">
-    <input id="venue" placeholder="Venue">
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3 id="mTitle"></h3>
+    <p id="mInfo"></p>
+    <input id="name" placeholder="Your Name">
     <input id="email" placeholder="Email">
-    <button onclick="pay()">Pay & Confirm</button>
+    <button onclick="pay()">Pay & Book</button>
   </div>
 </div>
 
-<!-- SUCCESS -->
-<div class="container section">
-  <div class="card" id="success" style="display:none">
-    <h2>🎉 Booking Confirmed</h2>
-    <p>Confirmation sent to your email.</p>
-  </div>
+<!-- ORGANIZER -->
+<div class="container">
+  <h2>Organize Your Own Event</h2>
+  <p>Become an organizer and list your events.</p>
+  <button onclick="alert('Organizer onboarding coming next')">Become an Organizer</button>
 </div>
 
-<!-- ADMIN -->
-<div class="container section">
-  <button onclick="loadAdmin()">Admin Dashboard</button>
-  <div class="card" id="admin" style="display:none"></div>
-</div>
+<!-- FOOTER -->
+<footer>
+  <p>© EventFlow Bharat</p>
+  <p>India’s smart event booking platform</p>
+</footer>
 
 <!-- MOBILE CTA -->
 <div class="mobile-cta">
-  <button onclick="document.getElementById('packages').scrollIntoView({behavior:'smooth'})">
-    Plan Your Event
-  </button>
+  <button onclick="scrollTo(0,0)">Search Events</button>
 </div>
 
 <script>
 const API="https://eventflow-bharat-backend.onrender.com";
-let pkg="",amt=0;
 
-function selectPkg(p,a){
-  pkg=p;amt=a;
-  document.getElementById("booking").style.display="block";
-  document.getElementById("booking").scrollIntoView({behavior:"smooth"});
+const allEvents=[
+ {id:1,title:"Music Night",cat:"music",city:"Bangalore",price:999,img:"https://picsum.photos/400/300?1"},
+ {id:2,title:"Tech Conference",cat:"tech",city:"Delhi",price:1499,img:"https://picsum.photos/400/300?2"},
+ {id:3,title:"Wedding Expo",cat:"wedding",city:"Mumbai",price:499,img:"https://picsum.photos/400/300?3"},
+ {id:4,title:"Corporate Meetup",cat:"corporate",city:"Hyderabad",price:1999,img:"https://picsum.photos/400/300?4"}
+];
+
+let selected=null,currentCat="all";
+
+function render(list){
+ events.innerHTML="";
+ list.forEach(e=>{
+  events.innerHTML+=`
+   <div class="card">
+    <img src="${e.img}">
+    <div class="card-body">
+     <h4>${e.title}</h4>
+     <p>${e.city}</p>
+     <p class="price">₹${e.price}</p>
+     <button onclick="openModal(${e.id})">Book Now</button>
+    </div>
+   </div>`;
+ });
+}
+render(allEvents);
+
+function setCat(c){
+ currentCat=c;
+ document.querySelectorAll(".cat").forEach(x=>x.classList.remove("active"));
+ event.target.classList.add("active");
+ filter();
+}
+
+function filter(){
+ const q=search.value.toLowerCase();
+ const cityVal=city.value;
+ render(allEvents.filter(e=>
+  (currentCat==="all"||e.cat===currentCat)&&
+  (cityVal===""||e.city===cityVal)&&
+  e.title.toLowerCase().includes(q)
+ ));
+}
+
+function openModal(id){
+ selected=allEvents.find(e=>e.id===id);
+ mTitle.innerText=selected.title;
+ mInfo.innerText=`₹${selected.price} • ${selected.city}`;
+ modal.style.display="flex";
 }
 
 async function pay(){
-  const key=await fetch(API+"/payment/key").then(r=>r.json());
-  const order=await fetch(API+"/payment/order",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt})}).then(r=>r.json());
+ const key=await fetch(API+"/payment/key").then(r=>r.json());
+ const order=await fetch(API+"/payment/order",{
+  method:"POST",
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({amount:selected.price})
+ }).then(r=>r.json());
 
-  new Razorpay({
-    key:key.key,
-    amount:order.amount,
-    order_id:order.id,
-    handler:async()=>{
-      await fetch(API+"/events",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({
-        name:name.value,date:date.value,venue:venue.value,email:email.value,package:pkg
-      })});
-      booking.style.display="none";
-      success.style.display="block";
-    }
-  }).open();
+ new Razorpay({
+  key:key.key,
+  amount:order.amount,
+  order_id:order.id,
+  handler:async()=>{
+   await fetch(API+"/events",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      name:selected.title,
+      email:email.value,
+      package:selected.title
+    })
+   });
+   alert("🎉 Booking confirmed!");
+   modal.style.display="none";
+  }
+ }).open();
 }
 
-async function loadAdmin(){
-  const d=await fetch(API+"/admin/dashboard").then(r=>r.json());
-  admin.style.display="block";
-  admin.innerHTML=`Total Events: ${d.totalEvents}\nRevenue: ₹${d.revenue}`;
-}
-
-async function askAI(q){
-  const r=await fetch(API+"/ai/assist",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})});
-  aiText.innerText=(await r.json()).reply;
+function ai(t){
+ aiText.innerText=
+  t==="wedding"?"Premium or Luxury is ideal for weddings.":
+  t==="corporate"?"Luxury suits corporate events.":
+  "Basic or Premium works great.";
 }
 </script>
 
