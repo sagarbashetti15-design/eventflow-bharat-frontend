@@ -122,37 +122,55 @@ function selectPackage(p,a){
   booking.style.display="block";
 }
 
-async function pay(){
-  const order = await fetch(API+"/payment/order",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ amount })
-  }).then(r=>r.json());
+async function pay()async function pay() {
+  if (!amount || !selectedPackage) {
+    alert("Please select a package first");
+    return;
+  }
 
+  // 1. Get Razorpay Key
+  const keyRes = await fetch(API + "/payment/key");
+  const { key } = await keyRes.json();
+
+  // 2. Create order
+  const order = await fetch(API + "/payment/order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount })
+  }).then(r => r.json());
+
+  // 3. Open Razorpay
   const options = {
-    key: "rzp_test_xxxxx",
+    key,
     amount: order.amount,
     currency: "INR",
     name: "EventFlow Bharat",
+    description: "Event Booking",
     order_id: order.id,
-    handler: async function(){
-      await fetch(API+"/events",{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-          name:name.value,
-          date:date.value,
-          venue:venue.value,
-          email:email.value,
-          package:selectedPackage
+    handler: async function () {
+
+      // 4. Save booking AFTER payment success
+      await fetch(API + "/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: document.getElementById("name").value,
+          date: document.getElementById("date").value,
+          venue: document.getElementById("venue").value,
+          email: document.getElementById("email").value,
+          package: selectedPackage
         })
       });
-      booking.style.display="none";
-      success.style.display="block";
+
+      booking.style.display = "none";
+      success.style.display = "block";
     }
   };
-  new Razorpay(options).open();
+
+  const rzp = new Razorpay(options);
+  rzp.open();
 }
+
 
 async function loadAdmin(){
   const stats = await fetch(API+"/admin/stats").then(r=>r.json());
