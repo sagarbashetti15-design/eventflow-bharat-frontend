@@ -2,122 +2,156 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>EventFlow Bharat – Book Your Event</title>
+<title>EventFlow Bharat – AI Event Booking</title>
 
 <style>
 body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(120deg,#fdfbfb,#ebedee);
   padding: 30px;
 }
+.container { max-width: 1100px; margin: auto; }
 .card {
   background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 900px;
-  margin: 20px auto;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  padding: 25px;
+  border-radius: 14px;
+  margin: 20px 0;
+  box-shadow: 0 12px 30px rgba(0,0,0,.08);
 }
-h1, h2 { margin-top: 0 }
+h1 span { color:#2c7be5 }
+.packages { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px }
+.package {
+  border:2px solid #eee;
+  border-radius:12px;
+  padding:20px;
+  transition:.3s;
+}
+.package:hover { border-color:#2c7be5; transform:translateY(-4px) }
 button {
-  padding: 12px;
-  background: #2c7be5;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 10px;
+  background:#2c7be5; color:#fff; border:none;
+  padding:14px; border-radius:8px; width:100%;
+  cursor:pointer; font-size:15px;
 }
 input, select {
-  padding: 10px;
-  width: 100%;
-  margin: 8px 0;
+  padding:12px; width:100%; margin:10px 0;
+  border-radius:8px; border:1px solid #ccc;
 }
-.package {
-  border: 1px solid #ddd;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+#booking { display:none }
+#success { display:none; text-align:center }
+.ai {
+  background:#f1f7ff;
+  border-left:5px solid #2c7be5;
 }
+.ai p { margin:8px 0 }
+.loader { display:none }
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<!-- HOME -->
 <div class="card">
-  <h1>EventFlow Bharat</h1>
-  <p>Book your event in minutes. Simple. Professional. Reliable.</p>
+  <h1><span>EventFlow</span> Bharat</h1>
+  <p>Book your event with confidence. Powered by AI.</p>
 </div>
 
-<!-- PACKAGES -->
+<div class="card ai">
+  <h3>🤖 AI Event Assistant</h3>
+  <p id="aiText">Tell me what event you are planning.</p>
+  <button onclick="aiSuggest('wedding')">Wedding</button>
+  <button onclick="aiSuggest('birthday')">Birthday</button>
+  <button onclick="aiSuggest('corporate')">Corporate</button>
+</div>
+
 <div class="card">
   <h2>Select Package</h2>
-
-  <div class="package">
-    <h3>Basic – ₹9,999</h3>
-    <p>Photography + Decoration</p>
-    <button onclick="selectPackage('Basic')">Choose Basic</button>
-  </div>
-
-  <div class="package">
-    <h3>Premium – ₹24,999</h3>
-    <p>Photography + Decoration + DJ</p>
-    <button onclick="selectPackage('Premium')">Choose Premium</button>
-  </div>
-
-  <div class="package">
-    <h3>Luxury – ₹49,999</h3>
-    <p>Complete Event Management</p>
-    <button onclick="selectPackage('Luxury')">Choose Luxury</button>
+  <div class="packages">
+    <div class="package">
+      <h3>Basic – ₹9,999</h3>
+      <p>Photography + Decoration</p>
+      <button onclick="selectPackage('Basic')">Choose Basic</button>
+    </div>
+    <div class="package">
+      <h3>Premium – ₹24,999</h3>
+      <p>Photography + Decoration + DJ</p>
+      <button onclick="selectPackage('Premium')">Choose Premium</button>
+    </div>
+    <div class="package">
+      <h3>Luxury – ₹49,999</h3>
+      <p>Complete Event Management</p>
+      <button onclick="selectPackage('Luxury')">Choose Luxury</button>
+    </div>
   </div>
 </div>
 
-<!-- BOOKING FORM -->
-<div class="card" id="bookingCard" style="display:none">
+<div class="card" id="booking">
   <h2>Book Your Event</h2>
-  <p>Package: <b id="selectedPackage"></b></p>
+  <p>Selected Package: <b id="pkg"></b></p>
+  <input id="name" placeholder="Event Name">
+  <input id="date" type="date">
+  <input id="venue" placeholder="Venue">
+  <input id="email" placeholder="Email">
+  <button onclick="bookEvent()">Pay & Book</button>
+  <p class="loader" id="loader">Processing booking...</p>
+</div>
 
-  <input id="eventName" placeholder="Event Name">
-  <input id="eventDate" type="date">
-  <input id="eventVenue" placeholder="Venue">
-  <input id="email" placeholder="Your Email">
+<div class="card" id="success">
+  <h2>🎉 Booking Confirmed!</h2>
+  <p>Our team will contact you shortly.</p>
+</div>
 
-  <button onclick="bookEvent()">Pay & Book Event</button>
-
-  <p id="result"></p>
 </div>
 
 <script>
 const API = "https://eventflow-bharat-backend.onrender.com";
-let chosenPackage = "";
+let selectedPackage = "";
 
-function selectPackage(pkg) {
-  chosenPackage = pkg;
-  document.getElementById("selectedPackage").innerText = pkg;
-  document.getElementById("bookingCard").style.display = "block";
+function selectPackage(p) {
+  selectedPackage = p;
+  document.getElementById("pkg").innerText = p;
+  document.getElementById("booking").style.display = "block";
   window.scrollTo(0, document.body.scrollHeight);
 }
 
 async function bookEvent() {
-  const name = document.getElementById("eventName").value;
-  const date = document.getElementById("eventDate").value;
-  const venue = document.getElementById("eventVenue").value;
+  const name = document.getElementById("name").value;
+  const date = document.getElementById("date").value;
+  const venue = document.getElementById("venue").value;
   const email = document.getElementById("email").value;
+
+  if (!name || !date || !venue || !email) {
+    alert("Please fill all details");
+    return;
+  }
+
+  document.getElementById("loader").style.display = "block";
 
   const res = await fetch(API + "/events", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type":"application/json" },
     body: JSON.stringify({
-      name, date, venue,
-      email,
-      package: chosenPackage
+      name, date, venue, email, package:selectedPackage
     })
   });
 
   const data = await res.json();
-  document.getElementById("result").innerText =
-    "✅ Event booked successfully! Our team will contact you.";
+  document.getElementById("loader").style.display = "none";
+
+  if (data.success) {
+    document.getElementById("booking").style.display = "none";
+    document.getElementById("success").style.display = "block";
+  } else {
+    alert("Booking failed");
+  }
+}
+
+function aiSuggest(type) {
+  const map = {
+    wedding: "For weddings, Premium or Luxury works best for stress-free planning.",
+    birthday: "For birthdays, Basic or Premium is ideal.",
+    corporate: "For corporate events, Luxury gives professional execution."
+  };
+  document.getElementById("aiText").innerText = map[type];
 }
 </script>
 
