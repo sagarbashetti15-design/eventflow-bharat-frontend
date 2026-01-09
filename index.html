@@ -2,48 +2,53 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>EventFlow Bharat – AI Event Booking</title>
+<title>EventFlow Bharat</title>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <style>
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(120deg,#fdfbfb,#ebedee);
+  font-family: Arial, sans-serif;
+  background: linear-gradient(120deg,#eef2f3,#d9e4f5);
   padding: 30px;
 }
 .container { max-width: 1100px; margin: auto; }
 .card {
-  background: #fff;
+  background: white;
   padding: 25px;
   border-radius: 14px;
-  margin: 20px 0;
-  box-shadow: 0 12px 30px rgba(0,0,0,.08);
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
 }
-h1 span { color:#2c7be5 }
-.packages { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px }
+.packages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+  gap: 20px;
+}
 .package {
-  border:2px solid #eee;
-  border-radius:12px;
-  padding:20px;
-  transition:.3s;
+  border: 2px solid #eee;
+  padding: 20px;
+  border-radius: 12px;
+  transition: .3s;
 }
-.package:hover { border-color:#2c7be5; transform:translateY(-4px) }
+.package:hover { border-color:#2c7be5; transform: translateY(-4px); }
 button {
-  background:#2c7be5; color:#fff; border:none;
-  padding:14px; border-radius:8px; width:100%;
-  cursor:pointer; font-size:15px;
+  background:#2c7be5;
+  color:white;
+  border:none;
+  padding:14px;
+  border-radius:8px;
+  width:100%;
+  cursor:pointer;
 }
-input, select {
-  padding:12px; width:100%; margin:10px 0;
-  border-radius:8px; border:1px solid #ccc;
+input {
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
 }
-#booking { display:none }
-#success { display:none; text-align:center }
-.ai {
-  background:#f1f7ff;
-  border-left:5px solid #2c7be5;
-}
-.ai p { margin:8px 0 }
-.loader { display:none }
+#booking,#success,#admin { display:none; }
+.ai { background:#f0f6ff; border-left:5px solid #2c7be5; }
 </style>
 </head>
 
@@ -51,16 +56,16 @@ input, select {
 <div class="container">
 
 <div class="card">
-  <h1><span>EventFlow</span> Bharat</h1>
-  <p>Book your event with confidence. Powered by AI.</p>
+  <h1>EventFlow Bharat</h1>
+  <p>Book your event. Pay instantly. Relax.</p>
 </div>
 
 <div class="card ai">
   <h3>🤖 AI Event Assistant</h3>
-  <p id="aiText">Tell me what event you are planning.</p>
-  <button onclick="aiSuggest('wedding')">Wedding</button>
-  <button onclick="aiSuggest('birthday')">Birthday</button>
-  <button onclick="aiSuggest('corporate')">Corporate</button>
+  <p id="aiText">What event are you planning?</p>
+  <button onclick="askAI('wedding')">Wedding</button>
+  <button onclick="askAI('birthday')">Birthday</button>
+  <button onclick="askAI('corporate')">Corporate</button>
 </div>
 
 <div class="card">
@@ -69,89 +74,104 @@ input, select {
     <div class="package">
       <h3>Basic – ₹9,999</h3>
       <p>Photography + Decoration</p>
-      <button onclick="selectPackage('Basic')">Choose Basic</button>
+      <button onclick="selectPackage('Basic',9999)">Choose</button>
     </div>
     <div class="package">
       <h3>Premium – ₹24,999</h3>
-      <p>Photography + Decoration + DJ</p>
-      <button onclick="selectPackage('Premium')">Choose Premium</button>
+      <p>Photography + DJ + Decor</p>
+      <button onclick="selectPackage('Premium',24999)">Choose</button>
     </div>
     <div class="package">
       <h3>Luxury – ₹49,999</h3>
       <p>Complete Event Management</p>
-      <button onclick="selectPackage('Luxury')">Choose Luxury</button>
+      <button onclick="selectPackage('Luxury',49999)">Choose</button>
     </div>
   </div>
 </div>
 
 <div class="card" id="booking">
-  <h2>Book Your Event</h2>
-  <p>Selected Package: <b id="pkg"></b></p>
+  <h2>Book Event</h2>
+  <p>Package: <b id="pkg"></b></p>
   <input id="name" placeholder="Event Name">
   <input id="date" type="date">
   <input id="venue" placeholder="Venue">
   <input id="email" placeholder="Email">
-  <button onclick="bookEvent()">Pay & Book</button>
-  <p class="loader" id="loader">Processing booking...</p>
+  <button onclick="pay()">Pay & Book</button>
 </div>
 
 <div class="card" id="success">
-  <h2>🎉 Booking Confirmed!</h2>
-  <p>Our team will contact you shortly.</p>
+  <h2>🎉 Booking Confirmed</h2>
+  <p>Our team will contact you soon.</p>
 </div>
+
+<div class="card">
+  <button onclick="loadAdmin()">Admin Dashboard</button>
+</div>
+
+<div class="card" id="admin"></div>
 
 </div>
 
 <script>
 const API = "https://eventflow-bharat-backend.onrender.com";
-let selectedPackage = "";
+let selectedPackage = "", amount = 0;
 
-function selectPackage(p) {
-  selectedPackage = p;
-  document.getElementById("pkg").innerText = p;
-  document.getElementById("booking").style.display = "block";
-  window.scrollTo(0, document.body.scrollHeight);
+function selectPackage(p,a){
+  selectedPackage=p; amount=a;
+  pkg.innerText=p;
+  booking.style.display="block";
 }
 
-async function bookEvent() {
-  const name = document.getElementById("name").value;
-  const date = document.getElementById("date").value;
-  const venue = document.getElementById("venue").value;
-  const email = document.getElementById("email").value;
+async function pay(){
+  const order = await fetch(API+"/payment/order",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ amount })
+  }).then(r=>r.json());
 
-  if (!name || !date || !venue || !email) {
-    alert("Please fill all details");
-    return;
-  }
-
-  document.getElementById("loader").style.display = "block";
-
-  const res = await fetch(API + "/events", {
-    method: "POST",
-    headers: { "Content-Type":"application/json" },
-    body: JSON.stringify({
-      name, date, venue, email, package:selectedPackage
-    })
-  });
-
-  const data = await res.json();
-  document.getElementById("loader").style.display = "none";
-
-  if (data.success) {
-    document.getElementById("booking").style.display = "none";
-    document.getElementById("success").style.display = "block";
-  } else {
-    alert("Booking failed");
-  }
-}
-
-function aiSuggest(type) {
-  const map = {
-    wedding: "For weddings, Premium or Luxury works best for stress-free planning.",
-    birthday: "For birthdays, Basic or Premium is ideal.",
-    corporate: "For corporate events, Luxury gives professional execution."
+  const options = {
+    key: "rzp_test_xxxxx",
+    amount: order.amount,
+    currency: "INR",
+    name: "EventFlow Bharat",
+    order_id: order.id,
+    handler: async function(){
+      await fetch(API+"/events",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+          name:name.value,
+          date:date.value,
+          venue:venue.value,
+          email:email.value,
+          package:selectedPackage
+        })
+      });
+      booking.style.display="none";
+      success.style.display="block";
+    }
   };
-  document.getElementById("aiText").innerText = map[type];
+  new Razorpay(options).open();
+}
+
+async function loadAdmin(){
+  const stats = await fetch(API+"/admin/stats").then(r=>r.json());
+  const list = await fetch(API+"/admin/events").then(r=>r.json());
+  admin.style.display="block";
+  admin.innerHTML = `<h3>Admin</h3>
+    <p>Total Events: ${stats.totalEvents}</p>
+    <p>Total Revenue: ₹${stats.revenue}</p>
+    <pre>${JSON.stringify(list,null,2)}</pre>`;
+}
+
+async function askAI(q){
+  const res = await fetch(API+"/ai/assist",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ question:q })
+  });
+  const data = await res.json();
+  aiText.innerText = data.reply;
 }
 </script>
 
