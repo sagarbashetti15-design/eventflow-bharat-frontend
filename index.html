@@ -1,8 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>EventFlow Bharat</title>
+
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <style>
@@ -30,7 +32,10 @@ body {
   border-radius: 12px;
   transition: .3s;
 }
-.package:hover { border-color:#2c7be5; transform: translateY(-4px); }
+.package:hover {
+  border-color:#2c7be5;
+  transform: translateY(-4px);
+}
 button {
   background:#2c7be5;
   color:white;
@@ -57,7 +62,7 @@ input {
 
 <div class="card">
   <h1>EventFlow Bharat</h1>
-  <p>Book your event. Pay instantly. Relax.</p>
+  <p>Book → Pay → Relax. AI-powered event booking.</p>
 </div>
 
 <div class="card ai">
@@ -114,72 +119,75 @@ input {
 
 <script>
 const API = "https://eventflow-bharat-backend.onrender.com";
-let selectedPackage = "", amount = 0;
+let selectedPackage = "";
+let amount = 0;
 
 function selectPackage(p,a){
-  selectedPackage=p; amount=a;
-  pkg.innerText=p;
-  booking.style.display="block";
+  selectedPackage=p;
+  amount=a;
+  document.getElementById("pkg").innerText=p;
+  document.getElementById("booking").style.display="block";
 }
 
-async function pay()async function pay() {
-  if (!amount || !selectedPackage) {
-    alert("Please select a package first");
+async function pay(){
+  if(!selectedPackage){
+    alert("Select a package first");
     return;
   }
 
-  // 1. Get Razorpay Key
-  const keyRes = await fetch(API + "/payment/key");
+  const keyRes = await fetch(API+"/payment/key");
   const { key } = await keyRes.json();
 
-  // 2. Create order
-  const order = await fetch(API + "/payment/order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount })
-  }).then(r => r.json());
+  const order = await fetch(API+"/payment/order",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ amount })
+  }).then(r=>r.json());
 
-  // 3. Open Razorpay
   const options = {
     key,
     amount: order.amount,
     currency: "INR",
     name: "EventFlow Bharat",
-    description: "Event Booking",
     order_id: order.id,
-    handler: async function () {
+    handler: async function (response) {
 
-      // 4. Save booking AFTER payment success
-      await fetch(API + "/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: document.getElementById("name").value,
-          date: document.getElementById("date").value,
-          venue: document.getElementById("venue").value,
-          email: document.getElementById("email").value,
+      await fetch(API+"/payment/verify",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify(response)
+      });
+
+      await fetch(API+"/events",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+          name: name.value,
+          date: date.value,
+          venue: venue.value,
+          email: email.value,
           package: selectedPackage
         })
       });
 
-      booking.style.display = "none";
-      success.style.display = "block";
+      booking.style.display="none";
+      success.style.display="block";
     }
   };
 
-  const rzp = new Razorpay(options);
-  rzp.open();
+  new Razorpay(options).open();
 }
-
 
 async function loadAdmin(){
   const stats = await fetch(API+"/admin/stats").then(r=>r.json());
   const list = await fetch(API+"/admin/events").then(r=>r.json());
   admin.style.display="block";
-  admin.innerHTML = `<h3>Admin</h3>
+  admin.innerHTML = `
+    <h3>Admin Dashboard</h3>
     <p>Total Events: ${stats.totalEvents}</p>
     <p>Total Revenue: ₹${stats.revenue}</p>
-    <pre>${JSON.stringify(list,null,2)}</pre>`;
+    <pre>${JSON.stringify(list,null,2)}</pre>
+  `;
 }
 
 async function askAI(q){
