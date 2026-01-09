@@ -1,11 +1,12 @@
-<h2>Admin Dashboard</h2>
+<h2>Admin Panel</h2>
 <div id="list"></div>
+
 <script>
-fetch("/admin/events",{headers:{Authorization:"Bearer TOKEN"}})
-.then(r=>r.json()).then(d=>{
- d.forEach(e=>{
-  list.innerHTML+=`${e.title_en}
-   <button onclick="approve(${e.id})">Approve</button>`;
- });
+fetch("https://YOUR-BACKEND.onrender.com/events")
+.then(r=>r.json())
+.then(d=>{
+  d.forEach(e=>{
+    list.innerHTML+=`${e.title} - ₹${e.price}<br>`;
+  });
 });
 </script>
