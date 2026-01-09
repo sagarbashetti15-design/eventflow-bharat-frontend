@@ -1,46 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>EventFlow Bharat</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  padding: 30px;
-}
-
-.card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 900px;
-  margin: 20px auto;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-}
-
-.hidden {
-  display: none;
-}
-
-input, button {
-  padding: 10px;
-  margin: 8px 0;
-  width: 100%;
-}
-
-button {
-  background: #2c7be5;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-}
-
-nav button {
-  width: auto;
-  margin-right: 10px;
-}
+body { font-family: Arial; background:#f4f6f8; padding:30px }
+.card { background:#fff; padding:20px; border-radius:10px;
+max-width:900px; margin:20px auto; box-shadow:0 6px 18px rgba(0,0,0,.1) }
+.hidden { display:none }
+input, button { padding:10px; margin:8px 0; width:100% }
+button { background:#2c7be5; color:#fff; border:none; cursor:pointer }
+nav button { width:auto; margin-right:10px }
 </style>
 </head>
 
@@ -48,43 +19,40 @@ nav button {
 
 <!-- LOGIN -->
 <div class="card" id="loginDiv">
-  <h2>Login – EventFlow Bharat</h2>
-  <input id="emailInput" placeholder="Email">
-  <input id="passwordInput" type="password" placeholder="Password">
+  <h2>Login</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
   <button onclick="login()">Login</button>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="app" class="hidden">
 
-  <nav class="card">
-    <button onclick="showSection('dashboard')">Dashboard</button>
-    <button onclick="showSection('createEvent')">Create Event</button>
-    <button onclick="showSection('events')">Events</button>
-    <button id="adminBtn" style="display:none" onclick="loadAdmin()">Admin</button>
-  </nav>
+<nav class="card">
+  <button onclick="show('dashboard')">Dashboard</button>
+  <button onclick="show('create')">Create Event</button>
+  <button onclick="show('list')">Events</button>
+  <button id="adminBtn" style="display:none" onclick="admin()">Admin</button>
+  <button onclick="payments()">Payments</button>
+</nav>
 
-  <!-- DASHBOARD -->
-  <div class="card" id="dashboard">
-    <h3>Dashboard</h3>
-    <p>Welcome to EventFlow Bharat</p>
-    <p>Status: <span id="status">Logged In</span></p>
-  </div>
+<div class="card" id="dashboard">
+  <h3>Dashboard</h3>
+  <p>Welcome to EventFlow Bharat</p>
+</div>
 
-  <!-- CREATE EVENT -->
-  <div class="card hidden" id="createEvent">
-    <h3>Create Event</h3>
-    <input id="eventName" placeholder="Event Name">
-    <input id="eventDate" type="date">
-    <input id="eventVenue" placeholder="Venue">
-    <button onclick="createEvent()">Save Event</button>
-  </div>
+<div class="card hidden" id="create">
+  <h3>Create Event</h3>
+  <input id="name" placeholder="Event Name">
+  <input id="date" type="date">
+  <input id="venue" placeholder="Venue">
+  <button onclick="createEvent()">Save</button>
+</div>
 
-  <!-- EVENTS LIST -->
-  <div class="card hidden" id="events">
-    <h3>Your Events</h3>
-    <ul id="eventsList"></ul>
-  </div>
+<div class="card hidden" id="list">
+  <h3>Events</h3>
+  <ul id="events"></ul>
+</div>
 
 </div>
 
@@ -92,93 +60,74 @@ nav button {
 const API = "https://eventflow-bharat-backend.onrender.com";
 let TOKEN = "";
 
-/* ---------- UI CONTROL ---------- */
-function showSection(id) {
-  ["dashboard", "createEvent", "events"].forEach(sec =>
-    document.getElementById(sec).classList.add("hidden")
+function show(id) {
+  ["dashboard","create","list"].forEach(x =>
+    document.getElementById(x).classList.add("hidden")
   );
   document.getElementById(id).classList.remove("hidden");
 }
 
-/* ---------- LOGIN ---------- */
 async function login() {
-  const email = document.getElementById("emailInput").value;
-  const password = document.getElementById("passwordInput").value;
-
   const res = await fetch(API + "/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({
+      email: email.value,
+      password: password.value
+    })
   });
-
   const data = await res.json();
-
   if (!data.token) {
-    alert("Login failed. Check email/password.");
+    alert("Login failed");
     return;
   }
-
   TOKEN = data.token;
-
-  document.getElementById("loginDiv").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-
-  if (data.role === "ADMIN") {
-    document.getElementById("adminBtn").style.display = "inline";
-  }
-
-  showSection("dashboard");
+  loginDiv.classList.add("hidden");
+  app.classList.remove("hidden");
+  if (data.role === "ADMIN") adminBtn.style.display = "inline";
 }
 
-/* ---------- EVENTS ---------- */
 async function createEvent() {
-  const name = document.getElementById("eventName").value;
-  const date = document.getElementById("eventDate").value;
-  const venue = document.getElementById("eventVenue").value;
-
   await fetch(API + "/events", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": TOKEN
     },
-    body: JSON.stringify({ name, date, venue })
+    body: JSON.stringify({
+      name: name.value,
+      date: date.value,
+      venue: venue.value
+    })
   });
-
   loadEvents();
-  alert("Event created");
 }
 
 async function loadEvents() {
   const res = await fetch(API + "/events", {
     headers: { "Authorization": TOKEN }
   });
-
-  const data = await res.json();
-  const ul = document.getElementById("eventsList");
-  ul.innerHTML = "";
-
-  data.forEach(e => {
+  const list = await res.json();
+  events.innerHTML = "";
+  list.forEach(e => {
     const li = document.createElement("li");
     li.innerText = `${e.name} | ${e.date} | ${e.venue}`;
-    ul.appendChild(li);
+    events.appendChild(li);
   });
-
-  showSection("events");
+  show("list");
 }
 
-/* ---------- ADMIN ---------- */
-async function loadAdmin() {
-  const res = await fetch(API + "/admin/stats", {
+async function admin() {
+  const res = await fetch(API + "/admin/dashboard", {
     headers: { "Authorization": TOKEN }
   });
-  const data = await res.json();
-  alert(JSON.stringify(data, null, 2));
+  alert(JSON.stringify(await res.json(), null, 2));
+}
+
+function payments() {
+  alert("Razorpay integration will open here (backend ready)");
 }
 </script>
 
 </body>
 </html>
-
-
-
