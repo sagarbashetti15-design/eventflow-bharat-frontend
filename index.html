@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>EventFlow Bharat</title>
+<title>EventFlow Bharat – Book Your Event</title>
 
 <style>
 body {
@@ -18,155 +18,106 @@ body {
   margin: 20px auto;
   box-shadow: 0 6px 18px rgba(0,0,0,0.1);
 }
-.hidden { display: none; }
-input, button {
-  padding: 10px;
-  margin: 8px 0;
-  width: 100%;
-}
+h1, h2 { margin-top: 0 }
 button {
+  padding: 12px;
   background: #2c7be5;
   color: #fff;
   border: none;
   cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
 }
-nav button {
-  width: auto;
-  margin-right: 10px;
+input, select {
+  padding: 10px;
+  width: 100%;
+  margin: 8px 0;
+}
+.package {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div class="card" id="loginDiv">
-  <h2>Login – EventFlow Bharat</h2>
-  <input id="emailInput" placeholder="Email">
-  <input id="passwordInput" type="password" placeholder="Password">
-  <button id="loginBtn">Login</button>
+<!-- HOME -->
+<div class="card">
+  <h1>EventFlow Bharat</h1>
+  <p>Book your event in minutes. Simple. Professional. Reliable.</p>
 </div>
 
-<!-- MAIN APP -->
-<div id="appDiv" class="hidden">
+<!-- PACKAGES -->
+<div class="card">
+  <h2>Select Package</h2>
 
-  <nav class="card">
-    <button onclick="showSection('dashboard')">Dashboard</button>
-    <button onclick="showSection('createEvent')">Create Event</button>
-    <button onclick="showSection('events')">Events</button>
-    <button id="adminBtn" style="display:none" onclick="loadAdmin()">Admin</button>
-  </nav>
-
-  <!-- DASHBOARD -->
-  <div class="card" id="dashboard">
-    <h3>Dashboard</h3>
-    <p>Welcome to EventFlow Bharat</p>
+  <div class="package">
+    <h3>Basic – ₹9,999</h3>
+    <p>Photography + Decoration</p>
+    <button onclick="selectPackage('Basic')">Choose Basic</button>
   </div>
 
-  <!-- CREATE EVENT -->
-  <div class="card hidden" id="createEvent">
-    <h3>Create Event</h3>
-    <input id="eventName" placeholder="Event Name">
-    <input id="eventDate" type="date">
-    <input id="eventVenue" placeholder="Venue">
-    <button onclick="createEvent()">Save Event</button>
+  <div class="package">
+    <h3>Premium – ₹24,999</h3>
+    <p>Photography + Decoration + DJ</p>
+    <button onclick="selectPackage('Premium')">Choose Premium</button>
   </div>
 
-  <!-- EVENTS LIST -->
-  <div class="card hidden" id="events">
-    <h3>Your Events</h3>
-    <ul id="eventsList"></ul>
+  <div class="package">
+    <h3>Luxury – ₹49,999</h3>
+    <p>Complete Event Management</p>
+    <button onclick="selectPackage('Luxury')">Choose Luxury</button>
   </div>
+</div>
 
+<!-- BOOKING FORM -->
+<div class="card" id="bookingCard" style="display:none">
+  <h2>Book Your Event</h2>
+  <p>Package: <b id="selectedPackage"></b></p>
+
+  <input id="eventName" placeholder="Event Name">
+  <input id="eventDate" type="date">
+  <input id="eventVenue" placeholder="Venue">
+  <input id="email" placeholder="Your Email">
+
+  <button onclick="bookEvent()">Pay & Book Event</button>
+
+  <p id="result"></p>
 </div>
 
 <script>
 const API = "https://eventflow-bharat-backend.onrender.com";
-let TOKEN = "";
+let chosenPackage = "";
 
-/* ---------- UI ---------- */
-function showSection(id) {
-  ["dashboard","createEvent","events"].forEach(sec => {
-    document.getElementById(sec).classList.add("hidden");
-  });
-  document.getElementById(id).classList.remove("hidden");
+function selectPackage(pkg) {
+  chosenPackage = pkg;
+  document.getElementById("selectedPackage").innerText = pkg;
+  document.getElementById("bookingCard").style.display = "block";
+  window.scrollTo(0, document.body.scrollHeight);
 }
 
-/* ---------- LOGIN ---------- */
-document.getElementById("loginBtn").addEventListener("click", login);
-
-async function login() {
-  const email = document.getElementById("emailInput").value;
-  const password = document.getElementById("passwordInput").value;
-
-  const res = await fetch(API + "/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
-
-  const data = await res.json();
-
-  if (!data.token) {
-    alert("Login failed. Check email/password.");
-    return;
-  }
-
-  TOKEN = data.token;
-
-  document.getElementById("loginDiv").classList.add("hidden");
-  document.getElementById("appDiv").classList.remove("hidden");
-
-  if (data.role === "ADMIN") {
-    document.getElementById("adminBtn").style.display = "inline";
-  }
-
-  showSection("dashboard");
-}
-
-/* ---------- EVENTS ---------- */
-async function createEvent() {
+async function bookEvent() {
   const name = document.getElementById("eventName").value;
   const date = document.getElementById("eventDate").value;
   const venue = document.getElementById("eventVenue").value;
+  const email = document.getElementById("email").value;
 
-  await fetch(API + "/events", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": TOKEN
-    },
-    body: JSON.stringify({ name, date, venue })
-  });
-
-  loadEvents();
-}
-
-async function loadEvents() {
   const res = await fetch(API + "/events", {
-    headers: { "Authorization": TOKEN }
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name, date, venue,
+      email,
+      package: chosenPackage
+    })
   });
 
-  const list = await res.json();
-  const ul = document.getElementById("eventsList");
-  ul.innerHTML = "";
-
-  list.forEach(e => {
-    const li = document.createElement("li");
-    li.innerText = `${e.name} | ${e.date} | ${e.venue}`;
-    ul.appendChild(li);
-  });
-
-  showSection("events");
-}
-
-/* ---------- ADMIN ---------- */
-async function loadAdmin() {
-  const res = await fetch(API + "/admin/dashboard", {
-    headers: { "Authorization": TOKEN }
-  });
   const data = await res.json();
-  alert(JSON.stringify(data, null, 2));
+  document.getElementById("result").innerText =
+    "✅ Event booked successfully! Our team will contact you.";
 }
 </script>
 
