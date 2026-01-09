@@ -3,9 +3,42 @@
   <head>
     <meta charset="UTF-8" />
     <title>EventFlow Bharat</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 40px;
+        background: #f5f5f5;
+      }
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 500px;
+        margin: auto;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      h1 {
+        color: #2c3e50;
+      }
+    </style>
   </head>
   <body>
-    <h1>EventFlow Bharat</h1>
-    <p>Frontend is LIVE 🚀</p>
+    <div class="card">
+      <h1>EventFlow Bharat</h1>
+      <p id="status">Connecting to backend...</p>
+    </div>
+
+    <script>
+      fetch("https://eventflow-bharat-backend-1.onrender.com")
+        .then(res => res.text())
+        .then(data => {
+          document.getElementById("status").innerText = data;
+        })
+        .catch(() => {
+          document.getElementById("status").innerText =
+            "Backend not reachable ❌";
+        });
+    </script>
   </body>
 </html>
+
