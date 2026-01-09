@@ -2,77 +2,255 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>EventFlow Bharat | Premium Event Planning</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventFlow Bharat | Premium Event Management</title>
+
+<!-- Favicon (SVG) -->
+<link rel="icon" type="image/svg+xml"
+href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+<rect width='100' height='100' rx='20' fill='%236C63FF'/>
+<text x='50' y='65' font-size='60' text-anchor='middle' fill='white'>E</text>
+</svg>">
+
+<!-- Razorpay -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <style>
-body{margin:0;font-family:Inter,Arial;background:#F7F9FC;color:#1F2937}
-.container{max-width:1200px;margin:auto;padding:40px}
-.hero{background:linear-gradient(135deg,#6C63FF,#4B47C6);color:#fff;border-radius:24px;padding:60px}
-.hero h1{font-size:52px;margin:0}
-.hero p{font-size:18px;opacity:.9}
-.card{background:#fff;border-radius:18px;padding:32px;box-shadow:0 10px 30px rgba(0,0,0,.08);margin:40px 0}
-.ai{background:#EEF0FF;border-left:6px solid #6C63FF}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
-.package{border:2px solid #E5E7EB;border-radius:18px;padding:28px;text-align:center}
-.package h3{margin-top:0}
-button{background:#6C63FF;color:#fff;border:none;border-radius:12px;padding:14px;width:100%;cursor:pointer;font-size:16px}
-input{width:100%;padding:14px;border-radius:12px;border:1px solid #D1D5DB;margin:10px 0}
-#booking,#success,#admin{display:none}
+/* ---------------- RESET ---------------- */
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Arial;
+  background:#F7F9FC;
+  color:#1F2937;
+  line-height:1.6;
+}
+a{text-decoration:none;color:inherit}
+
+/* ---------------- BRAND ---------------- */
+:root{
+  --brand:#6C63FF;
+  --brand-dark:#5148d6;
+  --soft:#EEF0FF;
+  --card:#FFFFFF;
+}
+
+/* ---------------- LAYOUT ---------------- */
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:24px;
+}
+.section{margin:80px 0}
+
+/* ---------------- ANIMATIONS ---------------- */
+.fade-up{
+  opacity:0;
+  transform:translateY(30px);
+  animation:fadeUp .8s ease forwards;
+}
+.delay-1{animation-delay:.2s}
+.delay-2{animation-delay:.4s}
+@keyframes fadeUp{
+  to{opacity:1;transform:none}
+}
+
+/* ---------------- HERO ---------------- */
+.hero{
+  background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color:#fff;
+  border-radius:28px;
+  padding:64px 32px;
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:32px;
+}
+.hero h1{font-size:44px;margin:0}
+.hero p{font-size:18px;opacity:.95}
+.cta{
+  display:inline-block;
+  background:#fff;
+  color:var(--brand);
+  padding:16px 28px;
+  border-radius:14px;
+  font-weight:600;
+}
+
+/* ---------------- CARDS ---------------- */
+.card{
+  background:var(--card);
+  border-radius:22px;
+  padding:32px;
+  box-shadow:0 14px 40px rgba(0,0,0,.08);
+}
+
+/* ---------------- AI ---------------- */
+.ai{
+  background:var(--soft);
+  border-left:6px solid var(--brand);
+}
+
+/* ---------------- PACKAGES ---------------- */
+.grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:24px;
+}
+.package{
+  border:2px solid #E5E7EB;
+  border-radius:22px;
+  padding:28px;
+  text-align:center;
+  transition:.3s;
+}
+.package:hover{
+  transform:translateY(-6px);
+  border-color:var(--brand);
+}
+.price{font-size:32px;font-weight:700}
+
+/* ---------------- FORMS ---------------- */
+input{
+  width:100%;
+  padding:16px;
+  border-radius:14px;
+  border:1px solid #D1D5DB;
+  margin:10px 0;
+}
+button{
+  width:100%;
+  padding:16px;
+  border-radius:14px;
+  border:none;
+  background:var(--brand);
+  color:#fff;
+  font-size:16px;
+  font-weight:600;
+}
+
+/* ---------------- MOBILE CTA ---------------- */
+.mobile-cta{
+  position:fixed;
+  bottom:16px;
+  left:16px;
+  right:16px;
+  display:none;
+}
+
+/* ---------------- ADMIN ---------------- */
+#admin{white-space:pre-wrap;font-size:14px}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media(min-width:768px){
+  .hero-grid{grid-template-columns:1.2fr .8fr}
+  .grid{grid-template-columns:repeat(3,1fr)}
+  .mobile-cta{display:none}
+}
+@media(max-width:767px){
+  .hero h1{font-size:34px}
+  .mobile-cta{display:block}
+}
 </style>
 </head>
 
 <body>
+
+<!-- HERO -->
 <div class="container">
+  <div class="hero fade-up">
+    <div class="hero-grid">
+      <div>
+        <!-- LOGO -->
+        <svg width="60" height="60" viewBox="0 0 100 100">
+          <rect width="100" height="100" rx="20" fill="#fff"/>
+          <text x="50" y="65" font-size="60" text-anchor="middle" fill="#6C63FF">E</text>
+        </svg>
 
-<div class="hero">
-  <h1>EventFlow Bharat</h1>
-  <p>Premium events. Trusted execution. AI-powered booking.</p>
-</div>
-
-<div class="card ai">
-  <h3>🤖 AI Event Assistant</h3>
-  <p id="aiText">What kind of event are you planning?</p>
-  <button onclick="askAI('wedding')">Wedding</button>
-  <button onclick="askAI('birthday')">Birthday</button>
-  <button onclick="askAI('corporate')">Corporate</button>
-</div>
-
-<div class="card">
-  <h2>Select Your Package</h2>
-  <div class="grid">
-    <div class="package">
-      <h3>Basic</h3><p>₹9,999</p>
-      <button onclick="selectPkg('Basic',9999)">Choose</button>
-    </div>
-    <div class="package">
-      <h3>Premium</h3><p>₹24,999</p>
-      <button onclick="selectPkg('Premium',24999)">Choose</button>
-    </div>
-    <div class="package">
-      <h3>Luxury</h3><p>₹49,999</p>
-      <button onclick="selectPkg('Luxury',49999)">Choose</button>
+        <h1>EventFlow Bharat</h1>
+        <p>Premium event planning with seamless booking, payments & AI assistance.</p>
+        <a class="cta" href="#packages">Plan Your Event</a>
+      </div>
+      <div>
+        <p>✔ Trusted by families & corporates</p>
+        <p>✔ Transparent pricing</p>
+        <p>✔ Stress-free execution</p>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="card" id="booking">
-  <h2>Book Your Event</h2>
-  <input id="name" placeholder="Event Name">
-  <input id="date" type="date">
-  <input id="venue" placeholder="Venue">
-  <input id="email" placeholder="Email">
-  <button onclick="pay()">Pay & Confirm</button>
+<!-- AI -->
+<div class="container section">
+  <div class="card ai fade-up delay-1">
+    <h3>🤖 AI Event Assistant</h3>
+    <p id="aiText">Tell me what you’re planning.</p>
+    <button onclick="askAI('wedding')">Wedding</button>
+    <button onclick="askAI('birthday')">Birthday</button>
+    <button onclick="askAI('corporate')">Corporate</button>
+  </div>
 </div>
 
-<div class="card" id="success">
-  <h2>🎉 Booking Confirmed</h2>
-  <p>You will receive an email confirmation shortly.</p>
+<!-- PACKAGES -->
+<div class="container section" id="packages">
+  <div class="fade-up delay-2">
+    <h2>Select Your Package</h2>
+    <div class="grid">
+      <div class="package">
+        <h3>Basic</h3>
+        <div class="price">₹9,999</div>
+        <p>Photography + Decoration</p>
+        <button onclick="selectPkg('Basic',9999)">Choose</button>
+      </div>
+      <div class="package">
+        <h3>Premium</h3>
+        <div class="price">₹24,999</div>
+        <p>DJ + Decor + Photography</p>
+        <button onclick="selectPkg('Premium',24999)">Choose</button>
+      </div>
+      <div class="package">
+        <h3>Luxury</h3>
+        <div class="price">₹49,999</div>
+        <p>End-to-end management</p>
+        <button onclick="selectPkg('Luxury',49999)">Choose</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<button onclick="loadAdmin()">Admin Dashboard</button>
-<div class="card" id="admin"></div>
+<!-- BOOKING -->
+<div class="container section">
+  <div class="card" id="booking" style="display:none">
+    <h2>Book Your Event</h2>
+    <input id="name" placeholder="Event Name">
+    <input id="date" type="date">
+    <input id="venue" placeholder="Venue">
+    <input id="email" placeholder="Email">
+    <button onclick="pay()">Pay & Confirm</button>
+  </div>
+</div>
 
+<!-- SUCCESS -->
+<div class="container section">
+  <div class="card" id="success" style="display:none">
+    <h2>🎉 Booking Confirmed</h2>
+    <p>Confirmation sent to your email.</p>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="container section">
+  <button onclick="loadAdmin()">Admin Dashboard</button>
+  <div class="card" id="admin" style="display:none"></div>
+</div>
+
+<!-- MOBILE CTA -->
+<div class="mobile-cta">
+  <button onclick="document.getElementById('packages').scrollIntoView({behavior:'smooth'})">
+    Plan Your Event
+  </button>
 </div>
 
 <script>
@@ -81,7 +259,8 @@ let pkg="",amt=0;
 
 function selectPkg(p,a){
   pkg=p;amt=a;
-  booking.style.display="block";
+  document.getElementById("booking").style.display="block";
+  document.getElementById("booking").scrollIntoView({behavior:"smooth"});
 }
 
 async function pay(){
@@ -96,7 +275,8 @@ async function pay(){
       await fetch(API+"/events",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({
         name:name.value,date:date.value,venue:venue.value,email:email.value,package:pkg
       })});
-      booking.style.display="none";success.style.display="block";
+      booking.style.display="none";
+      success.style.display="block";
     }
   }).open();
 }
@@ -104,7 +284,7 @@ async function pay(){
 async function loadAdmin(){
   const d=await fetch(API+"/admin/dashboard").then(r=>r.json());
   admin.style.display="block";
-  admin.innerHTML=`<h3>Admin Dashboard</h3><p>Total Events: ${d.totalEvents}</p><p>Revenue: ₹${d.revenue}</p>`;
+  admin.innerHTML=`Total Events: ${d.totalEvents}\nRevenue: ₹${d.revenue}`;
 }
 
 async function askAI(q){
