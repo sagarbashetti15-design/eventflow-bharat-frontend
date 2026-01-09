@@ -1,82 +1,105 @@
-const express = require("express");
-const cors = require("cors");
-const jwt = require("jsonwebtoken");
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>EventFlow Bharat</title>
+<style>
+body{font-family:Arial;background:#f4f6f8;padding:30px}
+.card{background:#fff;padding:20px;border-radius:10px;
+max-width:900px;margin:20px auto;box-shadow:0 6px 18px rgba(0,0,0,.1)}
+.hidden{display:none}
+input,button{padding:10px;margin:8px 0;width:100%}
+button{background:#2c7be5;color:#fff;border:none;cursor:pointer}
+nav button{width:auto;margin-right:10px}
+</style>
+</head>
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+<body>
 
-const PORT = process.env.PORT || 5000;
-const JWT_SECRET = "eventflow_bharat_super_secret";
+<div class="card" id="login">
+<h2>Login – EventFlow Bharat</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
 
-// ===== In-memory real storage (DB-ready) =====
-const users = [
-  { email: "admin@eventflowbharat.com", password: "admin123", role: "ADMIN" }
-];
-const events = [];
+<div id="app" class="hidden">
 
-// ===== Middleware =====
-function auth(req, res, next) {
-  const token = req.headers.authorization;
-  if (!token) return res.status(401).json({ message: "No token" });
-  try {
-    req.user = jwt.verify(token, JWT_SECRET);
-    next();
-  } catch {
-    res.status(401).json({ message: "Invalid token" });
-  }
+<nav class="card">
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('create')">Create Event</button>
+<button onclick="show('list')">Events</button>
+<button id="adminBtn" onclick="admin()" style="display:none">Admin</button>
+</nav>
+
+<div class="card" id="dashboard">
+<h3>Dashboard</h3>
+<p>Welcome to EventFlow Bharat</p>
+</div>
+
+<div class="card hidden" id="create">
+<h3>Create Event</h3>
+<input id="name" placeholder="Event Name">
+<input id="date" type="date">
+<input id="venue" placeholder="Venue">
+<button onclick="createEvent()">Save</button>
+</div>
+
+<div class="card hidden" id="list">
+<h3>Your Events</h3>
+<ul id="events"></ul>
+</div>
+
+</div>
+
+<script>
+const API="https://eventflow-bharat-backend.onrender.com";
+let TOKEN="";
+
+function show(id){
+["dashboard","create","list"].forEach(i=>document.getElementById(i).classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
 }
 
-function adminOnly(req, res, next) {
-  if (req.user.role !== "ADMIN")
-    return res.status(403).json({ message: "Admin only" });
-  next();
+async function login(){
+const email=emailInput.value;
+const password=passwordInput.value;
+const res=await fetch(API+"/auth/login",{method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({email,password})});
+const data=await res.json();
+TOKEN=data.token;
+if(!TOKEN){alert("Login failed");return;}
+loginDiv.classList.add("hidden");
+app.classList.remove("hidden");
+if(data.role==="ADMIN") adminBtn.style.display="inline";
 }
 
-// ===== Auth APIs =====
-app.post("/auth/login", (req, res) => {
-  const { email, password } = req.body;
-  const user = users.find(
-    u => u.email === email && u.password === password
-  );
-  if (!user) return res.status(401).json({ message: "Invalid credentials" });
+async function createEvent(){
+await fetch(API+"/events",{method:"POST",
+headers:{"Content-Type":"application/json","Authorization":TOKEN},
+body:JSON.stringify({name:name.value,date:date.value,venue:venue.value})});
+loadEvents();
+}
 
-  const token = jwt.sign(
-    { email: user.email, role: user.role },
-    JWT_SECRET,
-    { expiresIn: "2h" }
-  );
-
-  res.json({ token, role: user.role });
+async function loadEvents(){
+const res=await fetch(API+"/events",{headers:{Authorization:TOKEN}});
+const list=await res.json();
+events.innerHTML="";
+list.forEach(e=>{
+const li=document.createElement("li");
+li.innerText=`${e.name} | ${e.date} | ${e.venue}`;
+events.appendChild(li);
 });
+}
 
-// ===== Events APIs =====
-app.post("/events", auth, (req, res) => {
-  events.push({ ...req.body, createdBy: req.user.email });
-  res.json({ message: "Event created" });
-});
+async function admin(){
+const res=await fetch(API+"/admin/stats",{headers:{Authorization:TOKEN}});
+alert(JSON.stringify(await res.json(),null,2));
+}
+</script>
 
-app.get("/events", auth, (req, res) => {
-  res.json(events.filter(e => e.createdBy === req.user.email));
-});
-
-// ===== Admin APIs =====
-app.get("/admin/stats", auth, adminOnly, (req, res) => {
-  res.json({
-    totalUsers: users.length,
-    totalEvents: events.length,
-    companies: 1,
-    plans: ["Free"]
-  });
-});
-
-// ===== Health =====
-app.get("/", (req, res) => {
-  res.send("EventFlow Bharat Backend Running ✅");
-});
-
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
-});
+</body>
+</html>
 
 
