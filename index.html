@@ -1,33 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="kn">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>EventFlow Bharat</title>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+body{font-family:Arial;background:#f7f9fc;margin:0}
+.container{max-width:1100px;margin:auto;padding:20px}
+.card{background:#fff;padding:20px;border-radius:14px;margin:15px 0}
+button{background:#6c63ff;color:#fff;border:none;padding:10px 14px;border-radius:10px}
+</style>
 </head>
 <body>
 
-<h2>Events</h2>
-<div id="events"></div>
+<div class="container">
+  <h1>EventFlow Bharat</h1>
+
+  <select id="lang" onchange="loadEvents()">
+    <option value="ka">ಕನ್ನಡ</option>
+    <option value="en">English</option>
+  </select>
+
+  <div id="events"></div>
+
+  <h3>My Bookings</h3>
+  <input id="email" placeholder="Email">
+  <button onclick="history()">View</button>
+  <div id="history"></div>
+</div>
 
 <script>
 const API="https://YOUR-BACKEND.onrender.com";
 
-fetch(API+"/events").then(r=>r.json()).then(d=>{
-  d.forEach(e=>{
+async function loadEvents(){
+  const lang=langSelect.value;
+  const data=await fetch(API+"/events").then(r=>r.json());
+  events.innerHTML="";
+  data.forEach(e=>{
     events.innerHTML+=`
-      <div>
-        <h3>${e.title}</h3>
-        ₹${e.price}
-        <button onclick="pay(${e.price})">Book</button>
+      <div class="card">
+        <h3>${lang==="ka"?e.title_ka:e.title_en}</h3>
+        <p>${e.city}</p>
+        <p>₹${e.price}</p>
+        <button onclick="book(${e.id},${e.price})">
+          ${lang==="ka"?"ಈಗ ಬುಕ್ ಮಾಡಿ":"Book"}
+        </button>
       </div>`;
   });
-});
+}
 
-async function pay(price){
+async function book(id,price){
   const key=await fetch(API+"/payment/key").then(r=>r.json());
   const order=await fetch(API+"/payment/order",{
-    method:"POST",
-    headers:{'Content-Type':'application/json'},
+    method:"POST",headers:{'Content-Type':'application/json'},
     body:JSON.stringify({amount:price})
   }).then(r=>r.json());
 
@@ -36,12 +62,22 @@ async function pay(price){
     amount:order.amount,
     order_id:order.id,
     handler:()=>fetch(API+"/book",{
-      method:"POST",
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({phone:"+91XXXXXXXXXX"})
+      method:"POST",headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({event_id:id,email:email.value})
     }).then(()=>alert("Booked"))
   }).open();
 }
+
+async function history(){
+  const h=await fetch(API+"/bookings/"+email.value).then(r=>r.json());
+  historyDiv.innerHTML=JSON.stringify(h,null,2);
+}
+
+const events=document.getElementById("events");
+const langSelect=document.getElementById("lang");
+const historyDiv=document.getElementById("history");
+
+loadEvents();
 </script>
 </body>
 </html>
